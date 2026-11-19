@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AEON / PRIVATE SUITE — v0.8.7 Stable</title>
+<title>AEON / PRIVATE SUITE — v0.8.8 Mobile Landscape</title>
 <style>
   html,body{height:100%;margin:0;background:#060c16;color:#d7f5ff;font:15px system-ui,-apple-system,"Yu Gothic",sans-serif}
   body{display:grid;place-items:center}
@@ -20,7 +20,7 @@
   <h1>AEON / PRIVATE SUITE</h1>
   <div class="pulse"></div>
   <p>ゲームを読み込んでいます…</p>
-  <p class="minor">PLAYABLE BUILD v0.8.7 / STABLE</p>
+  <p class="minor">PLAYABLE BUILD v0.8.8 / MOBILE LANDSCAPE</p>
   <p id="error"></p>
 </main>
 <script>
@@ -39,10 +39,28 @@
         !gameHTML.trimEnd().endsWith('</html>')) {
       throw new Error('安定版の読み込みデータが不完全です。');
     }
-    // Load the byte-for-byte original v0.8.7 document, including embedded art.
-    // The original can also be reproduced with: python3 scripts/rebuild_original.py
+    // Preserve the exact v0.8.7 assets/physics in parts/. Inject only v0.8.8 touch + resize adapter.
+    // The untouched stable version remains at branch stable/v0.8.7.
+    const patchUrls=['./mobile/mobile-v088.css','./mobile/mobile-v088.js'];
+    const [css,js]=await Promise.all(patchUrls.map(async url=>{
+      const r=await fetch(url);
+      if(!r.ok)throw new Error(`${url}: HTTP ${r.status}`);
+      return r.text();
+    }));
+    const viewportToken='width=device-width, initial-scale=1';
+    const movementToken='let axis=Number(keys.right)-Number(keys.left),speed=(keys.run?315:172)*GAME_SPEED;';
+    const facingToken='if(axis!==0)p.facing=axis;';
+    if(!gameHTML.includes(viewportToken)||!gameHTML.includes(movementToken)||!gameHTML.includes(facingToken))
+      throw new Error('v0.8.7の実装が想定と異なります。安全のため差分適用を中止しました。');
+    let mobileHTML=gameHTML
+      .replace(viewportToken,'width=device-width, initial-scale=1, viewport-fit=cover')
+      .replace('PLAYABLE BUILD 0.8.7','PLAYABLE BUILD 0.8.8 · MOBILE')
+      .replace(movementToken,'let axis=(Math.abs(window.__aeonTouchAxis||0)>0.001?window.__aeonTouchAxis:Number(keys.right)-Number(keys.left)),speed=(keys.run?315:172)*GAME_SPEED;')
+      .replace(facingToken,'if(axis!==0)p.facing=Math.sign(axis);')
+      .replace('</head>','<style id="aeon-mobile-v088-style">\n'+css+'\n</style>\n</head>')
+      .replace('</body>','<script>\n'+js+'\n<\/script>\n</body>');
     document.open();
-    document.write(gameHTML);
+    document.write(mobileHTML);
     document.close();
   } catch (e) {
     console.error('AEON load failed:', e);

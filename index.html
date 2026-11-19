@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AEON / PRIVATE SUITE — v0.8.7 Stable</title>
+<style>
+  html,body{height:100%;margin:0;background:#060c16;color:#d7f5ff;font:15px system-ui,-apple-system,"Yu Gothic",sans-serif}
+  body{display:grid;place-items:center}
+  main{text-align:center;max-width:90%;line-height:1.8}
+  h1{font-size:24px;letter-spacing:.22em;font-weight:500}
+  .pulse{margin:22px auto;width:100px;height:2px;background:linear-gradient(90deg,transparent,#66dff2,transparent);box-shadow:0 0 14px #66dff2;animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{50%{opacity:.3}}
+  .minor{font-size:12px;color:#8da8b8}
+  #error{color:#ffb8a5;white-space:pre-line}
+</style>
+</head>
+<body>
+<main id="loading" role="status" aria-live="polite">
+  <h1>AEON / PRIVATE SUITE</h1>
+  <div class="pulse"></div>
+  <p>ゲームを読み込んでいます…</p>
+  <p class="minor">PLAYABLE BUILD v0.8.7 / STABLE</p>
+  <p id="error"></p>
+</main>
+<script>
+'use strict';
+(async () => {
+  const paths = Array.from({length:16},(_,i)=>`./parts/part-${String(i).padStart(2,'0')}.txt`);
+  try {
+    const chunks = await Promise.all(paths.map(async path => {
+      const result = await fetch(path);
+      if (!result.ok) throw new Error(`${path}: HTTP ${result.status}`);
+      return result.text();
+    }));
+    const gameHTML = chunks.join('');
+    if (!gameHTML.startsWith('<!doctype html>') ||
+        !gameHTML.includes('PLAYABLE BUILD 0.8.7') ||
+        !gameHTML.trimEnd().endsWith('</html>')) {
+      throw new Error('安定版の読み込みデータが不完全です。');
+    }
+    // Load the byte-for-byte original v0.8.7 document, including embedded art.
+    // The original can also be reproduced with: python3 scripts/rebuild_original.py
+    document.open();
+    document.write(gameHTML);
+    document.close();
+  } catch (e) {
+    console.error('AEON load failed:', e);
+    document.getElementById('error').textContent =
+      `読み込みに失敗しました。ページを再読み込みしてください。\n${e.message}`;
+  }
+})();
+</script>
+</body>
+</html>

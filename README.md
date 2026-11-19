@@ -16,6 +16,19 @@ A browser-playable **2D side-scrolling sci-fi suite exploration prototype** (Can
 - Higher-resolution backing canvas up to 1600 × 900 pixels on mobile, retaining original 1280 × 720 game world coordinates.
 - Desktop controls, animations, mechanics, sprites and cyan afterimages unchanged.
 
+## Development policy — MOBILE SUPPORT IS MANDATORY (2026-11-19)
+
+**User-approved requirement: every future AEON version, new feature, UI change, and refactor MUST continue to support mobile landscape play, in addition to desktop.** Mobile support is a release criterion, not an optional follow-up enhancement.
+
+- **Layout:** landscape-first responsive browser game; preserve the 16:9 gameplay aspect, fit within different viewport sizes, respect notches/safe-area insets, and avoid cut-off HUD/actions.
+- **Mobile controls:** left analog touch joystick; right-side **DASH** (hold), **JUMP** (tap), **USE/interact** (tap), and an accessible pause action. Keep simultaneous multi-touch input (joystick + dash + jump) working.
+- **Compatibility:** retain desktop keyboard controls as well; new mechanics must have discoverable, usable touch equivalents. Do not require a physical keyboard, mouse hover, or desktop-only interactions for core gameplay.
+- **Touch safety:** suppress accidental scrolling, pinch zoom, text selection and gesture conflicts inside the gameplay area while avoiding unnecessary interference outside it; release held controls reliably on touch cancel/blur.
+- **QA gate for every release:** verify desktop **and** portrait rotation guidance plus multiple small and wide landscape touch viewports. Exercise movement, simultaneous DASH + JUMP, USE, pause, HUD, safe-area layout, game progression, and console errors. Test on physical iOS Safari and Android Chrome when possible; otherwise explicitly mark physical devices **not tested**.
+- **Version discipline:** preserve immutable **v0.8.7** at `stable/v0.8.7`. Treat accepted **v0.8.8** as the initial mobile-compatible development reference. Never remove its mobile capabilities or degrade original animation/VFX while implementing future changes.
+
+This requirement also applies when the change appears "desktop-only" (e.g., sprites, VFX, dialogues, or menu layout). Document any mobile limitations before claiming a version is complete.
+
 ## Repository structure
 
 | Path | Purpose |

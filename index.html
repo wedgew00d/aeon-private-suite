@@ -2,72 +2,91 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AEON / PRIVATE SUITE — v0.8.8 Mobile Landscape</title>
-<style>
-  html,body{height:100%;margin:0;background:#060c16;color:#d7f5ff;font:15px system-ui,-apple-system,"Yu Gothic",sans-serif}
-  body{display:grid;place-items:center}
-  main{text-align:center;max-width:90%;line-height:1.8}
-  h1{font-size:24px;letter-spacing:.22em;font-weight:500}
-  .pulse{margin:22px auto;width:100px;height:2px;background:linear-gradient(90deg,transparent,#66dff2,transparent);box-shadow:0 0 14px #66dff2;animation:pulse 1.6s ease-in-out infinite}
-  @keyframes pulse{50%{opacity:.3}}
-  .minor{font-size:12px;color:#8da8b8}
-  #error{color:#ffb8a5;white-space:pre-line}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#060c16">
+<title>AEON / PRIVATE SUITE</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/game.css">
 </head>
 <body>
-<main id="loading" role="status" aria-live="polite">
-  <h1>AEON / PRIVATE SUITE</h1>
-  <div class="pulse"></div>
-  <p>ゲームを読み込んでいます…</p>
-  <p class="minor">PLAYABLE BUILD v0.8.8 / MOBILE LANDSCAPE</p>
-  <p id="error"></p>
+<main class="frame" id="frame" data-mode="intro">
+
+ <div class="band" id="band">
+  <canvas id="game" width="1280" height="720" tabindex="0" aria-label="横スクロールSFルーム探索ゲーム"></canvas>
+  <div class="scanlines"></div>
+
+  <div class="hud" id="hud">
+   <div class="top-hud">
+    <div class="player-card">
+     <img class="avatar" id="portrait" alt="黒髪のSFスイート案内役">
+     <div><div class="lv">LV.01 / RESIDENT</div><div class="name">AEON // SUITE</div><div class="sub">SECTOR 07 · EXPLORATION</div></div>
+    </div>
+    <div class="top-right">
+     <div class="objective">
+      <div class="tag">MISSION / 01 · PRIVATE QUARTERS</div>
+      <div class="line" id="missionText">室内設備を調査する</div>
+      <div class="count"><span id="missionCount">0 / 4</span> CHECKPOINTS</div>
+      <div class="meter"><b id="missionBar"></b></div>
+      <div class="minimap" id="minimap" aria-hidden="true"><i class="me" id="mapMe"></i></div>
+     </div>
+     <button class="icon-btn" id="pauseBtn" type="button" aria-label="メニュー"><span></span><span></span></button>
+    </div>
+   </div>
+   <div class="bottom-hud">
+    <div class="controls"><span><kbd>A</kbd><kbd>D</kbd> 移動</span><span><kbd>Shift</kbd> ダッシュ</span><span><kbd>Space</kbd> ジャンプ</span><span><kbd>E</kbd> 調べる</span><span><kbd>Esc</kbd> メニュー</span></div>
+    <div class="stat" id="stats" hidden>STATE: IDLE · X: 0000 · 60 FPS</div>
+   </div>
+  </div>
+
+  <button class="proximity" id="proximity" type="button">
+   <span class="key"><span class="k-key">E</span><span class="k-tap">TAP</span></span>
+   <span><strong id="nearTitle">端末にアクセス</strong><br><small>INTERACT · 設備を調べる</small></span>
+  </button>
+  <div class="mini-notice" id="notice"></div>
+ </div>
+
+ <div class="dialog-wrap" id="dialogWrap">
+  <div class="dialog" id="dialog">
+   <div class="dialog-kicker" id="dialogTag">FACILITY // SCAN RESULT</div>
+   <h3 id="dialogTitle"></h3>
+   <p id="dialogText"></p>
+   <div class="dialog-foot"><span id="dialogFootText">DATA LINK ESTABLISHED</span><button id="dialogClose" type="button">閉じる<span class="k-key"> [E]</span></button></div>
+  </div>
+ </div>
+
+ <div class="touch-ui" id="touchUI" aria-hidden="true">
+  <div class="stick" id="stick"><i class="chev l"></i><i class="chev r"></i><div class="stick-knob" id="stickKnob"></div></div>
+  <button class="tbtn use" id="useBtn" type="button" aria-label="調べる"><svg viewBox="0 0 24 24"><path d="M12 3.5 20.5 12 12 20.5 3.5 12Z"/><circle cx="12" cy="12" r="1.8"/></svg><span>USE</span></button>
+  <button class="tbtn jump" id="jumpBtn" type="button" aria-label="ジャンプ"><svg viewBox="0 0 24 24"><path d="M5 13.5 12 6.5l7 7M12 7v12"/></svg><span>JUMP</span></button>
+ </div>
+
+ <div class="overlay show" id="intro">
+  <div class="intro-content">
+   <div class="micro">PROJECT AEON / INTERACTIVE SCI-FI SUITE</div>
+   <div class="line-accent"></div>
+   <div class="intro-title"><b>PRIVATE</b><br>SUITE <span class="no">/ 07</span></div>
+   <div class="intro-sub">静寂と、光のあいだを歩く。</div>
+   <p class="intro-desc">高級SFスイートを舞台にした、2D横スクロール探索プロトタイプ。<br>黒髪の案内役を操作して、4つの設備を調査し、扉の先を目指そう。</p>
+   <button class="primary" id="startBtn" type="button" disabled>LOADING…</button>
+   <div class="intro-foot for-key"><em>A / D　歩く</em><em>SHIFT　ダッシュ</em><em>SPACE　ジャンプ</em><em>E　調べる</em><em>マーカーをクリック　自動で移動</em></div>
+   <div class="intro-foot for-touch"><em>画面左をドラッグ　移動（大きく倒すとダッシュ）</em><em>マーカーをタップ　自動で移動して調べる</em><em class="tall-only">横向きにすると、より広く表示されます</em></div>
+   <div class="build">BUILD 0.9.0</div>
+  </div>
+ </div>
+
+ <div class="overlay center" id="pause">
+  <div class="small-panel"><div class="micro">SYSTEM / ON HOLD</div><h2>PAUSE MENU</h2><p>操作を一時停止しています。探索を続けるか、最初からやり直せます。</p>
+   <div class="actions"><button class="primary" id="resumeBtn" type="button">RESUME　→</button><button class="secondary" id="restartBtn" type="button">RESTART</button><button class="secondary" id="fsBtn" type="button" hidden>全画面</button></div>
+  </div>
+ </div>
+
+ <div class="overlay center" id="ending">
+  <div class="small-panel"><div class="micro">MISSION COMPLETE</div><h2>SUITE EXPLORED.</h2><p>すべての設備を確認した。静かなSFスイートの先にも、新しい空間が続いている。<br><br>これは2Dアクションの操作感とアートを検証するためのプロトタイプです。</p>
+   <div class="actions"><button class="primary" id="exploreBtn" type="button">CONTINUE EXPLORING　→</button><button class="secondary" id="againBtn" type="button">PLAY AGAIN</button></div>
+  </div>
+ </div>
+
 </main>
-<script>
-'use strict';
-(async () => {
-  const paths = Array.from({length:16},(_,i)=>`./parts/part-${String(i).padStart(2,'0')}.txt`);
-  try {
-    const chunks = await Promise.all(paths.map(async path => {
-      const result = await fetch(path);
-      if (!result.ok) throw new Error(`${path}: HTTP ${result.status}`);
-      return result.text();
-    }));
-    const gameHTML = chunks.join('');
-    if (!gameHTML.startsWith('<!doctype html>') ||
-        !gameHTML.includes('PLAYABLE BUILD 0.8.7') ||
-        !gameHTML.trimEnd().endsWith('</html>')) {
-      throw new Error('安定版の読み込みデータが不完全です。');
-    }
-    // Preserve the exact v0.8.7 assets/physics in parts/. Inject only v0.8.8 touch + resize adapter.
-    // The untouched stable version remains at branch stable/v0.8.7.
-    const patchUrls=['./mobile/mobile-v088.css','./mobile/mobile-v088.js'];
-    const [css,js]=await Promise.all(patchUrls.map(async url=>{
-      const r=await fetch(url);
-      if(!r.ok)throw new Error(`${url}: HTTP ${r.status}`);
-      return r.text();
-    }));
-    const viewportToken='width=device-width, initial-scale=1';
-    const movementToken='let axis=Number(keys.right)-Number(keys.left),speed=(keys.run?315:172)*GAME_SPEED;';
-    const facingToken='if(axis!==0)p.facing=axis;';
-    if(!gameHTML.includes(viewportToken)||!gameHTML.includes(movementToken)||!gameHTML.includes(facingToken))
-      throw new Error('v0.8.7の実装が想定と異なります。安全のため差分適用を中止しました。');
-    let mobileHTML=gameHTML
-      .replace(viewportToken,'width=device-width, initial-scale=1, viewport-fit=cover')
-      .replace('PLAYABLE BUILD 0.8.7','PLAYABLE BUILD 0.8.8 · MOBILE')
-      .replace(movementToken,'let axis=(Math.abs(window.__aeonTouchAxis||0)>0.001?window.__aeonTouchAxis:Number(keys.right)-Number(keys.left)),speed=(keys.run?315:172)*GAME_SPEED;')
-      .replace(facingToken,'if(axis!==0)p.facing=Math.sign(axis);')
-      .replace('</head>','<style id="aeon-mobile-v088-style">\n'+css+'\n</style>\n</head>')
-      .replace('</body>','<script>\n'+js+'\n<\/script>\n</body>');
-    document.open();
-    document.write(mobileHTML);
-    document.close();
-  } catch (e) {
-    console.error('AEON load failed:', e);
-    document.getElementById('error').textContent =
-      `読み込みに失敗しました。ページを再読み込みしてください。\n${e.message}`;
-  }
-})();
-</script>
+<script src="js/game.js"></script>
 </body>
 </html>

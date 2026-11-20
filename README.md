@@ -1,73 +1,63 @@
 # AEON / PRIVATE SUITE
 
-A browser-playable **2D side-scrolling sci-fi suite exploration prototype** (Canvas + vanilla JavaScript).
+ブラウザで遊ぶ、2D横スクロールのSFスイート探索プロトタイプ（Canvas 2D、ライブラリなし、ビルドなし）。
 
-- **Current deployment:** v0.8.8 Mobile Landscape (2026-11-19)
-- **User-approved immutable baseline:** v0.8.7, archived at branch [`stable/v0.8.7`](https://github.com/wedgew00d/aeon-private-suite/tree/stable/v0.8.7)
-- **Play:** https://wedgew00d.github.io/aeon-private-suite/
+- 遊ぶ: https://wedgew00d.github.io/aeon-private-suite/
+- 現在の版: **v0.9.0**（画面と操作の作り直し）
+- 承認済みの基準版 v0.8.7 は、ブランチ [`stable/v0.8.7`](https://github.com/wedgew00d/aeon-private-suite/tree/stable/v0.8.7) にそのまま残してある
 
-## What's new in v0.8.8
+## 操作
 
-- Landscape-oriented, edge-to-edge mobile game viewport with the original **16:9 canvas aspect preserved** (letterbox areas on extra-wide phones).
-- Left drag joystick for analog horizontal movement; swipe left/right from within the joystick ring.
-- Right-side **DASH** (press/hold), **JUMP** (tap), **USE** (tap), plus a **pause** button.
-- Simultaneous multi-touch for joystick + DASH + JUMP.
-- Safe-area inset support for device notches and gestures; portrait orientation guidance.
-- Higher-resolution backing canvas up to 1600 × 900 pixels on mobile, retaining original 1280 × 720 game world coordinates.
-- Desktop controls, animations, mechanics, sprites and cyan afterimages unchanged.
+| | キーボード・マウス | タッチ |
+|---|---|---|
+| 移動 | A / D、← / → | 画面の左半分をドラッグ（触れた場所にスティックが出る） |
+| ダッシュ | Shift を押しながら移動 | スティックを大きく倒す |
+| ジャンプ | Space、W、↑ | JUMP |
+| 調べる | E、Enter | USE、または対象の上に出る札をタップ |
+| 自動で移動して調べる | マーカーをクリック | マーカーをタップ |
+| パネルを閉じる | E、Enter、Esc、移動キー | どこかをタップ、またはスティックを倒す |
+| メニュー | Esc | 右上のボタン |
 
-## Development policy — MOBILE SUPPORT IS MANDATORY (2026-11-19)
+確認用: `G` 残像の強さ、`F2` 移動アニメの方式、`F3` 状態とFPSの表示。
 
-**User-approved requirement: every future AEON version, new feature, UI change, and refactor MUST continue to support mobile landscape play, in addition to desktop.** Mobile support is a release criterion, not an optional follow-up enhancement.
+## 画面の作り
 
-- **Layout:** landscape-first responsive browser game; preserve the 16:9 gameplay aspect, fit within different viewport sizes, respect notches/safe-area insets, and avoid cut-off HUD/actions.
-- **Mobile controls:** left analog touch joystick; right-side **DASH** (hold), **JUMP** (tap), **USE/interact** (tap), and an accessible pause action. Keep simultaneous multi-touch input (joystick + dash + jump) working.
-- **Compatibility:** retain desktop keyboard controls as well; new mechanics must have discoverable, usable touch equivalents. Do not require a physical keyboard, mouse hover, or desktop-only interactions for core gameplay.
-- **Touch safety:** suppress accidental scrolling, pinch zoom, text selection and gesture conflicts inside the gameplay area while avoiding unnecessary interference outside it; release held controls reliably on touch cancel/blur.
-- **QA gate for every release:** verify desktop **and** portrait rotation guidance plus multiple small and wide landscape touch viewports. Exercise movement, simultaneous DASH + JUMP, USE, pause, HUD, safe-area layout, game progression, and console errors. Test on physical iOS Safari and Android Chrome when possible; otherwise explicitly mark physical devices **not tested**.
-- **Version discipline:** preserve immutable **v0.8.7** at `stable/v0.8.7`. Treat accepted **v0.8.8** as the initial mobile-compatible development reference. Never remove its mobile capabilities or degrade original animation/VFX while implementing future changes.
+- canvas は常にウィンドウ全体に広がる。ワールドの縦は固定で、横はウィンドウの形に合わせて見える範囲が変わる（横長の端末ほど部屋が広く見える。黒帯は出さない）。
+- 高さの低い画面（横持ちのスマホ）では、ワールドの縦720のうち600だけを映す。キャラクターが約1.2倍に見える。
+- 縦長の画面では、上にゲーム、下に説明パネルと操作を置く。
+- HUD とパネルの文字は CSS ピクセルで固定（canvas と一緒に縮めない）。低い画面では、文字を小さくする代わりに飾りの行を消す。マーカーの名前も、画面上で約12pxを下回らないように拡大する。
+- タッチ操作のボタンはゲーム画面の上に重ねる。ノッチなどの安全領域（safe-area）を避ける。
+- タッチ端末では、開始時に全画面表示を試みる（ブラウザが拒否した場合はそのまま）。一時停止メニューからも切り替えられる。
 
-This requirement also applies when the change appears "desktop-only" (e.g., sprites, VFX, dialogues, or menu layout). Document any mobile limitations before claiming a version is complete.
+## 変えていないもの
 
-## Repository structure
+移動速度、ジャンプ、アニメーションのコマ順と保持時間、青い残像（STANDARD）、背景とスプライトの画像は v0.8.7 のまま。`js/game.js` の該当部分は v0.8.7 のスクリプトから一字も変えずに持ってきている。
 
-| Path | Purpose |
-| --- | --- |
-| `index.html` | GitHub Pages loader, reconstructs original v0.8.7 game and injects v0.8.8 mobile adapter |
-| `mobile/mobile-v088.css` | Mobile viewport, layout, translucent joystick/action buttons |
-| `mobile/mobile-v088.js` | Pointer/multitouch controls + device-aware backing resolution |
-| `parts/part-00.txt` … `part-15.txt` | **Unmodified** UTF-8 chunks of the v0.8.7 standalone game (6.31 MB in total) |
-| `scripts/rebuild_original.py` | Rebuilds the untouched standalone **v0.8.7** game from parts |
-| `docs/AEON_v087_notes.md` | Japanese stable-baseline design and development handoff |
-| `RELEASE_NOTES_v0.8.7.md` | Baseline release notes |
-| `RELEASE_NOTES_v0.8.8.md` | Mobile adapter release notes |
+## 構成
 
-The multipart storage is a transfer workaround for the GitHub integration, **not** a runtime game-engine dependency. The loader fetches the chunks and two small mobile adapter files over GitHub Pages. There are no external assets or third-party libraries. The base 0.8.7 bytes have not been altered.
+| パス | 内容 |
+|---|---|
+| `index.html` | 画面の構造 |
+| `css/game.css` | レイアウト、HUD、タッチ操作の見た目 |
+| `js/game.js` | ゲーム本体。後半に、画面の割り付けとポインタ入力 |
+| `assets/` | 背景、スプライト、肖像（v0.8.7 の単一HTMLに埋めこまれていた画像を、そのままファイルに取り出したもの） |
+| `docs/AEON_v090_handoff.md` | **v0.9.0 の引継ぎ。作業の前にまずこれを読む**（v0.8.8 から変えた方針、コードの読み方、今後守ること） |
+| `docs/AEON_v087_notes.md` | v0.8.7 時点の制作方針（アートとアニメーションの基準は今も有効） |
+| `RELEASE_NOTES_*.md` | 版ごとの変更点 |
 
-### Play or test locally
+v0.8.8 までの `parts/`（単一HTMLを16分割したもの）と、それを実行時に結合して書き換えるローダーは廃止した。
 
-- Open the standalone `AEON_Private_Suite_2D_v088_Mobile_Standalone.html` download in Chrome, Edge or Safari. It includes all imagery and the adapter in one HTML file, so it also works offline.
-- For a local copy of this **repository**, run a local static HTTP server (`python3 -m http.server 8000`) and visit `http://localhost:8000/`. Opening this `index.html` with `file://` will typically block its `fetch` calls.
-- To rebuild the exact v0.8.7 baseline, run `python3 scripts/rebuild_original.py`.
+### 手元で動かす
 
-## Controls
+```
+python3 -m http.server 8000
+```
 
-| Desktop | Mobile landscape |
-| --- | --- |
-| A/D or ←/→: move | Left analog joystick: move left/right |
-| Shift: dash | Hold DASH while moving |
-| Space: jump | Tap JUMP |
-| E/Enter: interact, close dialog | Tap USE |
-| Esc: pause | Top center pause button |
-| G: cyan afterimage intensity | Uses the approved STANDARD intensity |
+で `http://localhost:8000/` を開く。`index.html` を直接開いても遊べるが、ブラウザの制限で青い残像だけ出ない。
 
-### Design and QA notes
+## 確認した範囲
 
-- First test at mobile landscape sizes 844×390, 915×412 and 667×375, portrait guidance at 390×844, desktop at 1280×800.
-- Chromium touch emulation confirmed joystick analog input, DASH press/release, JUMP, and simultaneous three-touch movement + dash + jump with no JavaScript errors.
-- Original physics and camera remain unchanged; only an optional touch axis is added for joystick input.
-- The v0.8.7 baseline is **not overwritten**; use `stable/v0.8.7` as the recovery point.
-- Safari/iOS browser and physical Android hardware behavior should be verified with real devices; browser emulation does not guarantee every platform quirk.
-- GitHub Pages setup: **Settings → Pages → Deploy from a branch → main / (root)**.
+- Chromium の自動操作で、横持ちスマホ相当（915×356、844×390、667×375）のタッチの通し、568×320 と縦持ち（390×844）の表示、PC（1366×650、1920×1080、1000×800）のキー操作とクリックだけでの通しクリア。詳細は `docs/AEON_v090_handoff.md` の 6 章。
+- **実機（iOS Safari、Android Chrome）では未確認。**
 
-No open-source license is implied for the original game art or code. Please do not add personal data, credentials, or secrets to this public repository.
+原作のアートとコードに、オープンソースのライセンスは付けていない。
